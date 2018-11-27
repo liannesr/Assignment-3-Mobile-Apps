@@ -327,17 +327,18 @@ public class LaberinthView extends View  {
                                 return true;
                             }
                         }
-                        else if(i == row && j<=column){
-                            for(int k=0;k<tanks.size();k++){
-                                if(fireball != tanks.get(k).getFireball()){
-                                    if(fireball.getPositionX() < tanks.get(k).getCurrXPos()+WIDTH
-                                            && (fireball.getPositionY()> tanks.get(k).getCurrYPos() &&
-                                            fireball.getPositionY()<tanks.get(k).getCurrYPos() + WIDTH)){
-                                        if(i==0) tanks.get(1).addPoint();
-                                        if(i==1) tanks.get(0).addPoint();
-                                    }
-                                }
-                            }
+
+
+                    }
+                }
+                for(int k=0;k<tanks.size();k++){
+                    if(fireball != tanks.get(k).getFireball()){
+                        if(fireball.getPositionX() < tanks.get(k).getCurrXPos()+WIDTH
+                                && (fireball.getPositionY()> tanks.get(k).getCurrYPos() &&
+                                fireball.getPositionY()<tanks.get(k).getCurrYPos() + WIDTH)){
+                            if(k==0) tanks.get(1).addPoint();
+                            if(k==1) tanks.get(0).addPoint();
+                            return true;
                         }
                     }
                 }
@@ -353,17 +354,17 @@ public class LaberinthView extends View  {
                                 return true;
                             }
                         }
-                        else if(i == row && j>=column){
-                            for(int k=0;k<tanks.size();k++){
-                                if(fireball != tanks.get(k).getFireball()){
-                                    if(fireball.getPositionX() + fireball.getWidth()> tanks.get(k).getCurrXPos()
-                                            && (fireball.getPositionY()> tanks.get(k).getCurrYPos() &&
-                                            fireball.getPositionY()<tanks.get(k).getCurrYPos() + WIDTH)){
-                                        if(i==0) tanks.get(1).addPoint();
-                                        if(i==1) tanks.get(0).addPoint();
-                                    }
-                                }
-                            }
+
+                    }
+                }
+                for(int k=0;k<tanks.size();k++){
+                    if(fireball != tanks.get(k).getFireball()){
+                        if(fireball.getPositionX() + fireball.getWidth()> tanks.get(k).getCurrXPos()
+                                && (fireball.getPositionY()> tanks.get(k).getCurrYPos() &&
+                                fireball.getPositionY()<tanks.get(k).getCurrYPos() + WIDTH)){
+                            if(k==0) tanks.get(1).addPoint();
+                            if(k==1) tanks.get(0).addPoint();
+                            return true;
                         }
                     }
                 }
@@ -373,7 +374,7 @@ public class LaberinthView extends View  {
         else if(yVel!=0){
             //column is imp!!
             if(yVel<0){
-                //up
+                //up correcto
                 for (int j = 0; j < game.getColumns(); j++) {
                     for (int i = game.getRows(); i >= 0; i--) {
                         if (j == column && i<= row && game.getGameGrid()[i][j].getBitmap() != null) {
@@ -382,17 +383,17 @@ public class LaberinthView extends View  {
                                 return true;
                             }
                         }
-                        else if(j == column && i<= row){
-                            for(int k=0;k<tanks.size();k++){
-                                if(fireball != tanks.get(k).getFireball()){
-                                    if(fireball.getPositionY() < tanks.get(k).getCurrYPos()+HEIGHT
-                                            && (fireball.getPositionX()> tanks.get(k).getCurrXPos() &&
-                                            fireball.getPositionX()<tanks.get(k).getCurrXPos() + WIDTH) ){
-                                        if(i==0) tanks.get(1).addPoint();
-                                        if(i==1) tanks.get(0).addPoint();
-                                    }
-                                }
-                            }
+
+                    }
+                }
+                for(int k=0;k<tanks.size();k++){
+                    if(fireball != tanks.get(k).getFireball()){
+                        if(fireball.getPositionY() < tanks.get(k).getCurrYPos()+HEIGHT
+                                && (fireball.getPositionX()> tanks.get(k).getCurrXPos() &&
+                                fireball.getPositionX()<tanks.get(k).getCurrXPos() + WIDTH) ){
+                            if(k==0) tanks.get(1).addPoint();
+                            if(k==1) tanks.get(0).addPoint();
+                            return true;
                         }
                     }
                 }
@@ -408,17 +409,17 @@ public class LaberinthView extends View  {
                                 return true;
                             }
                         }
-                        else if(j == column && i>=row){
-                            for(int k=0;k<tanks.size();k++){
-                                if(fireball != tanks.get(k).getFireball()){
-                                    if(fireball.getPositionY() +fireball.getHeight() > tanks.get(k).getCurrYPos()
-                                            && (fireball.getPositionX()> tanks.get(k).getCurrXPos() &&
-                                            fireball.getPositionX()<tanks.get(k).getCurrXPos() + WIDTH)){
-                                        if(i==0) tanks.get(1).addPoint();
-                                        if(i==1) tanks.get(0).addPoint();
-                                    }
-                                }
-                            }
+
+                    }
+                }
+                for(int k=0;k<tanks.size();k++){
+                    if(fireball != tanks.get(k).getFireball()){
+                        if(fireball.getPositionY() +fireball.getHeight() > tanks.get(k).getCurrYPos()
+                                && (fireball.getPositionX()> tanks.get(k).getCurrXPos() &&
+                                fireball.getPositionX()<tanks.get(k).getCurrXPos() + WIDTH)){
+                            if(k==0) tanks.get(1).addPoint();
+                            if(k==1) tanks.get(0).addPoint();
+                            return true;
                         }
                     }
                 }
