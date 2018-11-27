@@ -12,6 +12,7 @@ public class Fireball {
     private int radius;
     private int velocityX;
     private int velocityY;
+    private int firedRow, firedColumn;
 
     public Fireball(int positionX, int positionY, int width, int height){
         this.positionX=positionX;
@@ -20,6 +21,24 @@ public class Fireball {
         this.height=height;
         this.isActive=false;
         radius = width/2;
+        firedColumn=0;
+        firedRow=0;
+    }
+
+    public void setFiredColumn(int firedColumn) {
+        this.firedColumn = firedColumn;
+    }
+
+    public void setFiredRow(int firedRow) {
+        this.firedRow = firedRow;
+    }
+
+    public int getFiredColumn() {
+        return firedColumn;
+    }
+
+    public int getFiredRow() {
+        return firedRow;
     }
 
     public void setPositionX(int positionX) {

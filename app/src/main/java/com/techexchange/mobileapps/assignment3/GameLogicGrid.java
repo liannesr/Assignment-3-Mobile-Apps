@@ -12,7 +12,6 @@ public class GameLogicGrid {
     private ArrayList<Tank> tanks= new ArrayList<>();
     private int columns;
     private int rows;
-    private static final String TAG = "LaberinthView";
 
 
     public GameLogicGrid(int rows, int columns, Tank tankOne, Tank tankTwo){
@@ -37,36 +36,12 @@ public class GameLogicGrid {
         if(tanks.get(0).getHorizontal() && tanks.get(0).getVertical()) return false;
 
         Tank tank = tanks.get(0);
-        tanks.get(0).setBitmap(bitmap);
-        tanks.get(0).setRow(newRow);
-        tanks.get(0).setColumn(newColumn);
+        tank.setBitmap(bitmap);
+        tank.setRow(newRow);
+        tank.setColumn(newColumn);
         return true;
     }
 
-    public boolean doesFireballCollide(Fireball fireball, GameElement gameElement){
-
-        if(fireball.getPositionY()<gameElement.getPositionTopY()+gameElement.getHeight()){//upcollision
-            Log.d(TAG, "up");
-            fireball.setActive(false);
-            return true;
-        }
-        else if(fireball.getPositionY()+fireball.getHeight()>gameElement.getPositionTopY()){ //down collision
-            Log.d(TAG, "down");
-            fireball.setActive(false);
-            return true;
-        }
-        else if(fireball.getPositionX()<gameElement.getPositionTopX()+gameElement.getWidth()){ //left collision
-            Log.d(TAG, "left");
-            fireball.setActive(false);
-            return true;
-        }
-        else if(fireball.getPositionX()+fireball.getWidth()>gameElement.getPositionTopX()){//right collision
-            Log.d(TAG, "right");
-            fireball.setActive(false);
-            return true;
-        }
-        return false;
-    }
 
     public int getColumns(){
         return this.columns;

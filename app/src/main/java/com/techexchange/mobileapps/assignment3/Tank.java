@@ -12,9 +12,8 @@ public class Tank {
     private int currYPos;
     private boolean moving;
     private boolean up,down,left, right;
-    public boolean upCount,downCount,leftCount, rightCount;
-    public Fireball fireball;
-    public int points;
+    private Fireball fireball;
+    private int points;
 
     public Tank(int row, int column, Bitmap bitmap, int posX, int posY){
         this.row=row;
@@ -91,7 +90,9 @@ public class Tank {
     }
 
     public void addPoint(){
+        fireball.setActive(false);
         this.points++;
+        System.out.println("POINTS: " +points);
     }
 
     public void setPosX(int posX) {
