@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.os.Handler;
 import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -13,6 +14,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.view.GestureDetectorCompat;
 import java.util.ArrayList;
+import java.net.Socket;
 
 public class LaberinthView extends View  {
     private static final String TAG = "LaberinthView";
@@ -32,10 +34,13 @@ public class LaberinthView extends View  {
     private ArrayList<Tank> tanks = new ArrayList<>();
     private GameLogicGrid game= new GameLogicGrid(9,6,tankOne,tankTwo);
 
+    private SendThread send;
+    private ReceiveThread receive;
+
     Bitmap grayBitmap =  BitmapFactory.decodeResource(this.getResources(),R.drawable.graybrick);
 
    //ng this constructor is necessary.
-    public LaberinthView(Context context) {
+    public LaberinthView(Context context, Socket socket) {
         super(context);
         setUpLaberinth();
         screenHeight = super.getHeight();
@@ -43,6 +48,12 @@ public class LaberinthView extends View  {
         mDetector = new GestureDetectorCompat(context, new MyGestureListener());
         tanks.add(tankOne);
         tanks.add(tankTwo);
+        send = new SendThread("SendThread", socket);
+        send.start();
+        send.prepareHandler();
+        receive = new ReceiveThread("ReceiveThread", socket);
+        receive.start();
+        receive.prepareHandler();
 
     }
 
@@ -122,6 +133,7 @@ public class LaberinthView extends View  {
         }
 
         invalidate(); // Force a redraw.
+        send.postTask("HOLA LLEGUE!!!!");
     }
 
     @Override
