@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
                 System.out.println(clientSocket);
 
-                BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+               // BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 //while(true) {
                   //  String in = reader.readLine();
                    // System.out.println("Hi-->" + in);
@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Socket socket) {
-            laberinth = new LaberinthView(context, socket);
+            laberinth = new LaberinthView(context, socket, true);
             setContentView(laberinth);
             super.onPostExecute(socket);
         }
@@ -127,8 +127,8 @@ public class MainActivity extends AppCompatActivity {
             Socket socket = null;
             try{
                 socket = new Socket(InetAddress.getByName(SERVER),PORT_NUMBER);
-                PrintWriter print = new PrintWriter(socket.getOutputStream(), true);
-                print.println("ADIOSSSS");
+                //PrintWriter print = new PrintWriter(socket.getOutputStream(), true);
+               // print.println("ADIOSSSS");
                 return socket;
             } catch(IOException | NullPointerException ex ){
                 Log.d("Client Thread", "IO Exception", ex);
@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Socket socket) {
-            laberinth = new LaberinthView(context, socket);
+            laberinth = new LaberinthView(context, socket, false);
             setContentView(laberinth);
             super.onPostExecute(socket);
         }

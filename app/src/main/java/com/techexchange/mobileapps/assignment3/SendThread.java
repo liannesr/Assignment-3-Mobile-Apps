@@ -42,8 +42,8 @@ public class SendThread extends HandlerThread {
             public void run() {
                 try{
                     PrintWriter print = new PrintWriter(socket.getOutputStream(), true);
-                    print.println("ADIOSSSS " + string);
-                    System.out.println("LO ENVIE!");
+                    print.println(string);
+                    //System.out.println("LO ENVIE!");
                 } catch(IOException e){
                     Log.d("Send Thread", "IO Exception", e);
                 }

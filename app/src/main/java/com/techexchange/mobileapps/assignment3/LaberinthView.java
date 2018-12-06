@@ -13,6 +13,11 @@ import android.view.View;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.view.GestureDetectorCompat;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.net.Socket;
 
@@ -36,11 +41,13 @@ public class LaberinthView extends View  {
 
     private SendThread send;
     private ReceiveThread receive;
+    private Handler ht;
 
+    private boolean isServer;
     Bitmap grayBitmap =  BitmapFactory.decodeResource(this.getResources(),R.drawable.graybrick);
 
    //ng this constructor is necessary.
-    public LaberinthView(Context context, Socket socket) {
+    public LaberinthView(Context context, Socket socket, Boolean isServer) {
         super(context);
         setUpLaberinth();
         screenHeight = super.getHeight();
@@ -51,10 +58,12 @@ public class LaberinthView extends View  {
         send = new SendThread("SendThread", socket);
         send.start();
         send.prepareHandler();
-        receive = new ReceiveThread("ReceiveThread", socket);
+        receive = new ReceiveThread("ReceiveThread", socket, game);
         receive.start();
         receive.prepareHandler();
-
+        receive.postTask(receive.repCall());
+        ht = new Handler(receive.getLooper());
+        this.isServer = isServer;
     }
 
     public void setUpLaberinth(){
@@ -133,9 +142,20 @@ public class LaberinthView extends View  {
         }
 
         invalidate(); // Force a redraw.
-        send.postTask("HOLA LLEGUE!!!!");
+        if(isServer){
+            send.postTask(makeStringBundle(tankOne.getCurrXPos(),tankOne.getCurrYPos(),tankOne.getRow(),tankOne.getColumn()));
+        }
+        else{
+            send.postTask(makeStringBundle(tankTwo.getCurrXPos(),tankTwo.getCurrYPos(),tankTwo.getRow(),tankTwo.getColumn()));
+        }
+
     }
 
+    public String makeStringBundle(int xTank, int yTank, int column, int row){
+        String stringBundle = xTank + ","+yTank+","+column+","+row;
+        System.out.println("stringBundle: "+ stringBundle);
+        return stringBundle;
+    }
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);

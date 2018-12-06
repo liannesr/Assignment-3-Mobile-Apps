@@ -24,6 +24,9 @@ public class GameLogicGrid {
     public void setElementInGrid(GameElement gridElement, int row, int column){
         gameGrid[row][column] = gridElement;
     }
+    public Tank getTankOne(){
+        return tanks.get(0);
+    }
 
     public boolean changeTankPosition(int rowDif, int columnDif, Bitmap bitmap){
         int oldRow = tanks.get(0).getRow();
