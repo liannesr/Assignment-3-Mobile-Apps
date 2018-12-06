@@ -6,6 +6,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.support.v4.view.MotionEventCompat;
+import android.util.Base64;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -15,11 +16,13 @@ import android.graphics.Bitmap;
 import android.support.v4.view.GestureDetectorCompat;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.net.Socket;
+
 
 public class LaberinthView extends View  {
     private static final String TAG = "LaberinthView";
@@ -29,8 +32,10 @@ public class LaberinthView extends View  {
     private int screenWidth;
     private int screenHeight;
     private GestureDetectorCompat mDetector;
+    public int damageWallRow=-1;
+    public int damageWallCol=-1;
 
-    private Bitmap down,up,right,left;
+    public Bitmap down,up,right,left;
     private final int WIDTH = 180;
     private final int HEIGHT = 176;
 
@@ -50,6 +55,7 @@ public class LaberinthView extends View  {
     public LaberinthView(Context context, Socket socket, Boolean isServer) {
         super(context);
         setUpLaberinth();
+        this.isServer = isServer;
         screenHeight = super.getHeight();
         screenWidth = super.getWidth();
         mDetector = new GestureDetectorCompat(context, new MyGestureListener());
@@ -58,12 +64,12 @@ public class LaberinthView extends View  {
         send = new SendThread("SendThread", socket);
         send.start();
         send.prepareHandler();
-        receive = new ReceiveThread("ReceiveThread", socket, game);
+        receive = new ReceiveThread("ReceiveThread", socket, game, this);
         receive.start();
         receive.prepareHandler();
-        receive.postTask(receive.repCall());
+        receive.postTask(receive.repCall(isServer));
         ht = new Handler(receive.getLooper());
-        this.isServer = isServer;
+
     }
 
     public void setUpLaberinth(){
@@ -76,8 +82,10 @@ public class LaberinthView extends View  {
         this.tankOne.setBitmap(tankOne);
         this.tankTwo.setBitmap(rotateBitmap(tankOne, 180));
 
+        this.tankOne.setCurrXPos(0);
+        this.tankOne.setCurrYPos(0);
         this.tankTwo.setCurrXPos(1080-WIDTH);
-        this.tankTwo.setCurrYPos(HEIGHT*4);
+        this.tankTwo.setCurrYPos(0);
         initializeBitmaps();
         this.tankOne.setBitmap(down);
         this.tankTwo.setBitmap(down);
@@ -128,34 +136,78 @@ public class LaberinthView extends View  {
 
         for(int i=0;i<tanks.size();i++){
             canvas.drawBitmap(tanks.get(i).getBitmap(),tanks.get(i).getCurrXPos(),tanks.get(i).getCurrYPos(),paint);
+
             if(tanks.get(i).getFireball().getActive()){
                 canvas.drawOval(tanks.get(i).getFireball().getPositionX(), tanks.get(i).getFireball().getPositionY(),
                         tanks.get(i).getFireball().getPositionX()+50, tanks.get(i).getFireball().getPositionY()+50, paint);
                 updateFireball(tanks.get(i).getFireball());
             }
+
         }
-        updateTank();
+
+        for(int i=0;i<tanks.size();i++){
+            updateTank(tanks.get(i));
+
+        }
         try {
             Thread.sleep(50);
         } catch (InterruptedException ex) {
             Log.e(TAG, "Sleep interrupted!", ex);
         }
 
-        invalidate(); // Force a redraw.
         if(isServer){
-            send.postTask(makeStringBundle(tankOne.getCurrXPos(),tankOne.getCurrYPos(),tankOne.getRow(),tankOne.getColumn()));
+            int activation = 0;
+            if( tankOne.getFireball().getActive()){
+                activation=1;
+            }
+            System.out.println("I MADE IT");
+            send.postTask(makeStringBundle(tankOne.getCurrXPos(),tankOne.getCurrYPos(),tankOne.getRow(),tankOne.getColumn(),
+                    damageWallRow,damageWallCol,activation, tankOne.getFireball().getPositionX(),tankOne.getFireball().getPositionY(),
+                    tankOne.getFireball().getVelocityX(), tankOne.getFireball().getVelocityY(),checkOrientation(tankOne.getBitmap())));
+            damageWallRow=-1;
+            damageWallCol=-1;
         }
         else{
-            send.postTask(makeStringBundle(tankTwo.getCurrXPos(),tankTwo.getCurrYPos(),tankTwo.getRow(),tankTwo.getColumn()));
+            int activation = 0;
+            if( tankTwo.getFireball().getActive()){
+                activation=1;
+            }
+            send.postTask(makeStringBundle(tankTwo.getCurrXPos(),tankTwo.getCurrYPos(),tankTwo.getRow(),tankTwo.getColumn(),
+                    damageWallRow,damageWallCol,activation, tankTwo.getFireball().getPositionX(),tankTwo.getFireball().getPositionY(),
+                    tankTwo.getFireball().getVelocityX(), tankTwo.getFireball().getVelocityY(), checkOrientation(tankTwo.getBitmap())));
+            damageWallRow=-1;
+            damageWallCol=-1;
         }
+        invalidate(); // Force a redraw.
+
 
     }
 
-    public String makeStringBundle(int xTank, int yTank, int column, int row){
-        String stringBundle = xTank + ","+yTank+","+column+","+row;
+    public String makeStringBundle(int xTank, int yTank, int column, int row, int damageRow, int damageWallCol, int fireballActive, int fireX,
+                                   int fireY, int firexVelocity, int fireyVelocity, String orientation){
+        String stringBundle = xTank + ","+yTank+","+column+","+row+","+damageRow+","+damageWallCol+","+fireballActive+","+
+                fireX + ","+fireY+ ","+firexVelocity+","+fireyVelocity+ ","+orientation;
         System.out.println("stringBundle: "+ stringBundle);
         return stringBundle;
     }
+    public String checkOrientation(Bitmap bitmap){
+        if(bitmap==up){
+            return "up";
+        }
+        else if(bitmap==down){
+            return "down";
+
+        }
+        else if(bitmap==left){
+            return "left";
+        }
+        else if(bitmap==right){
+            return "right";
+        }
+        return null;
+    }
+
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
@@ -185,10 +237,10 @@ public class LaberinthView extends View  {
 
     }
 
-    public void updateTank(){
-        GameElement gameElement = game.getGameGrid()[tankOne.getRow()][tankOne.getColumn()];
-        int currX = tankOne.getCurrXPos();
-        int currY =tankOne.getCurrYPos();
+    public void updateTank(Tank tank){
+        GameElement gameElement = game.getGameGrid()[tank.getRow()][tank.getColumn()];
+        int currX = tank.getCurrXPos();
+        int currY =tank.getCurrYPos();
         int goalPosX = gameElement.getPositionTopX();
         int goalPosY= gameElement.getPositionTopY();
         if(currX!=goalPosX){
@@ -199,7 +251,7 @@ public class LaberinthView extends View  {
             else{
                 currX-=DISTANCE_TO_RUN;
             }
-            tankOne.setCurrXPos(currX);
+            tank.setCurrXPos(currX);
         }
         else if(currY!=goalPosY){
             if(currY<goalPosY){
@@ -208,15 +260,15 @@ public class LaberinthView extends View  {
             else{
                 currY-=DISTANCE_TO_RUN;
             }
-            tankOne.setCurrYPos(currY);
+            tank.setCurrYPos(currY);
 
         }
         else {
-            tankOne.setMovement(false);
-            tankOne.setRight(false);
-            tankOne.setLeft(false);
-            tankOne.setUp(false);
-            tankOne.setDown(false);
+            tank.setMovement(false);
+            tank.setRight(false);
+            tank.setLeft(false);
+            tank.setUp(false);
+            tank.setDown(false);
         }
     }
 
@@ -260,11 +312,25 @@ public class LaberinthView extends View  {
     @Override
     public boolean onTouchEvent(MotionEvent event){
         if (this.mDetector.onTouchEvent(event)) {
-            if(!tankOne.getFireball().getActive()){
-                establishDirection(tankOne);
+            if(isServer){
+                if(!tankOne.getFireball().getActive()){
+                    establishDirection(tankOne);
+                }
+            }
+            else{
+                if(!tankTwo.getFireball().getActive()){
+                    establishDirection(tankTwo);
+                }
             }
             return true;
         }else{
+            Tank tank;
+            if(isServer){
+                tank = tankOne;
+            }
+            else{
+                tank = tankTwo;
+            }
             int action = MotionEventCompat.getActionMasked(event);
             switch(action) {
                 case (MotionEvent.ACTION_DOWN) :
@@ -281,42 +347,54 @@ public class LaberinthView extends View  {
                     if(differenceX>=50 || differenceY>=50){
                         if(initialXTouch<finalXTouch && differenceX>differenceY){
                             if(isLongSwipe(differenceX,differenceY)){
-                                tankOne.setRight(true);
-                                game.changeTankPosition(0,1, right);
-                                tankOne.setMovement(true);
+                                //tankOne.setRight(true);
+                                tank.setRight(true);
+                                game.changeTankPosition(0,1, right, tank);
+                                //tankOne.setMovement(true);
+                                tank.setMovement(true);
                             }
-                            else if(!tankOne.getMovement()){
-                                tankOne.setBitmap(right);
+                            else if(!tank.getMovement()){ //tankOne.getMovement()
+                                tank.setBitmap(right);
+                                //tankOne.setBitmap(right);
                             }
                         }
                         else if(initialXTouch>finalXTouch && differenceX>differenceY){
                             if(isLongSwipe(differenceX,differenceY)){
-                                tankOne.setLeft(true);
-                                game.changeTankPosition(0,-1, left);
-                                tankOne.setMovement(true);
+                                //tankOne.setLeft(true);
+                                tank.setLeft(true);
+                                game.changeTankPosition(0,-1, left, tank);
+                                tank.setMovement(true);
+                               // tankOne.setMovement(true);
                             }
-                            else if(!tankOne.getMovement()){
-                                tankOne.setBitmap(left);
+                            else if(!tank.getMovement()){//tankOne.getMovement()
+                                //tankOne.setBitmap(left);
+                                tank.setBitmap(left);
                             }
                         }
                         else if(initialYTouch>finalYTouch && differenceY>differenceX){
                             if(isLongSwipe(differenceX,differenceY)){
-                                tankOne.setUp(true);
-                                game.changeTankPosition(-1,0, up);
-                                tankOne.setMovement(true);
+                                //tankOne.setUp(true);
+                                tank.setUp(true);
+                                game.changeTankPosition(-1,0, up, tank);
+                               // tankOne.setMovement(true);
+                                tank.setMovement(true);
                             }
-                            else if(!tankOne.getMovement()){
-                                tankOne.setBitmap(up);
+                            else if(!tank.getMovement()){ //tankOne.getMovement()
+                                //tankOne.setBitmap(up);
+                                tank.setBitmap(up);
                             }
                         }
                         else if(initialYTouch<finalYTouch && differenceY>differenceX){
                             if(isLongSwipe(differenceX,differenceY)){
-                                tankOne.setDown(true);
-                                game.changeTankPosition(1,0, down);
-                                tankOne.setMovement(true);
+                                //tankOne.setDown(true);
+                                tank.setDown(true);
+                                game.changeTankPosition(1,0, down, tank);
+                                tank.setMovement(true);
+                                //tankOne.setMovement(true);
                             }
-                            else if(!tankOne.getMovement()){
-                                tankOne.setBitmap(down);
+                            else if(!tank.getMovement()){ //ankOne.getMovement()
+                                //tankOne.setBitmap(down);
+                                tank.setBitmap(down);
                             }
                         }
 
@@ -356,6 +434,8 @@ public class LaberinthView extends View  {
                         if (i == row && j<=column && game.getGameGrid()[i][j].getBitmap() != null) {
                             if (fireball.getPositionX() < game.getGameGrid()[i][j].getPositionTopX() + WIDTH){
                                 game.getGameGrid()[i][j].damageOcurred();
+                                damageWallRow=i;
+                                damageWallCol=j;
                                 return true;
                             }
                         }
@@ -383,6 +463,8 @@ public class LaberinthView extends View  {
                         if (i == row && j>=column && game.getGameGrid()[i][j].getBitmap() != null) {
                             if (fireball.getPositionX() + fireball.getWidth()> game.getGameGrid()[i][j].getPositionTopX()){
                                 game.getGameGrid()[i][j].damageOcurred();
+                                damageWallRow=i;
+                                damageWallCol=j;
                                 return true;
                             }
                         }
@@ -412,6 +494,8 @@ public class LaberinthView extends View  {
                         if (j == column && i<= row && game.getGameGrid()[i][j].getBitmap() != null) {
                             if (fireball.getPositionY() < game.getGameGrid()[i][j].getPositionTopY()+HEIGHT) {
                                 game.getGameGrid()[i][j].damageOcurred();
+                                damageWallRow=i;
+                                damageWallCol=j;
                                 return true;
                             }
                         }
@@ -438,6 +522,8 @@ public class LaberinthView extends View  {
                         if (j == column && i>=row && game.getGameGrid()[i][j].getBitmap() != null) {
                             if (fireball.getPositionY() + fireball.getHeight() > game.getGameGrid()[i][j].getPositionTopY()){
                                 game.getGameGrid()[i][j].damageOcurred();
+                                damageWallRow=i;
+                                damageWallCol=j;
                                 return true;
                             }
                         }
@@ -481,9 +567,13 @@ public class LaberinthView extends View  {
 
     public void initializeBitmaps(){
         this.up = rotateBitmap(tankOne.getBitmap(),-90);
+        game.up = this.up;
         this.down = rotateBitmap(tankOne.getBitmap(), 90);
+        game.down = this.down;
         this.right = rotateBitmap(tankOne.getBitmap(), 0);
+        game.right = this.right;
         this.left = rotateBitmap(tankOne.getBitmap(), 180);
+        game.left = this.left;
     }
 
 
