@@ -1,9 +1,6 @@
 package com.techexchange.mobileapps.assignment3;
 
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.util.Log;
-
 import java.util.ArrayList;
 
 public class GameLogicGrid {
@@ -36,8 +33,6 @@ public class GameLogicGrid {
     public boolean changeTankPosition(int rowDif, int columnDif, Bitmap bitmap, Tank tank){
         int oldRow = tank.getRow();
         int oldColumn = tank.getColumn();
-//        int oldRow = tanks.get(0).getRow();
-//        int oldColumn = tanks.get(0).getColumn();
         int newRow = oldRow + rowDif;
         int newColumn = oldColumn + columnDif;
 
@@ -45,7 +40,6 @@ public class GameLogicGrid {
         if(gameGrid[newRow][newColumn].getBitmap()!=null) return false;
         if(tank.getHorizontal() && tank.getVertical()) return false;
 
-        //Tank tank = tanks.get(0);
         tank.setBitmap(bitmap);
         tank.setRow(newRow);
         tank.setColumn(newColumn);

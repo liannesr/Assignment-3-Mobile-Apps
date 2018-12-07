@@ -1,6 +1,9 @@
 package com.techexchange.mobileapps.assignment3;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.widget.Toast;
+
 public class Tank {
 
     private int row;
@@ -89,10 +92,21 @@ public class Tank {
         return posX;
     }
 
-    public void addPoint(){
+    public boolean addPoint(Context context, String player){
         fireball.setActive(false);
         this.points++;
-        System.out.println("POINTS: " +points);
+        Toast toast;
+        if(points>=5){
+            toast = Toast.makeText(context, " CONGRATULATIONS TO "+ player + "YOU WON!", Toast.LENGTH_SHORT);
+            toast.show();
+            return true;
+        }
+        else{
+            toast = Toast.makeText(context, player+" POINTS: "+ points, Toast.LENGTH_SHORT);
+            toast.show();
+            return false;
+        }
+
     }
 
     public void setPosX(int posX) {

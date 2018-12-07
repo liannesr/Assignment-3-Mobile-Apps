@@ -1,16 +1,12 @@
 package com.techexchange.mobileapps.assignment3;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.HandlerThread;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 
@@ -32,7 +28,6 @@ public class ReceiveThread extends HandlerThread{
 
     }
 
-
     @Override
     public void run() {
         super.run();
@@ -51,12 +46,9 @@ public class ReceiveThread extends HandlerThread{
         return new Runnable() {
             @Override
             public void run() {
-               // System.out.println("ENTRE");
                 try{
                     String in = br.readLine();
-                    System.out.println("SERVER: " + isServer.toString() + " envio: "+ in);
                     deStringBundle(in, isServer);
-                    //System.out.println("Hi-->" + in);
                 }catch(IOException e){
                     Log.d("Receive Thread", "IO Exception", e);
                 }

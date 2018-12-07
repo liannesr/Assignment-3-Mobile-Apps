@@ -1,6 +1,5 @@
 package com.techexchange.mobileapps.assignment3;
 
-import android.graphics.Bitmap;
 
 public class Fireball {
 
